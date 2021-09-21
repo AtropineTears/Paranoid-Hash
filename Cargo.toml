@@ -2,6 +2,7 @@
 name = "paranoid-hash"
 version = "0.1.0"
 edition = "2018"
+description = "A Hashing Library For Those Paranoid With Their Security"
 categories = ["asynchronous","cryptography","filesystem","parsing"]
 keywords = ["b2sum", "hashing","blake2b","file-hashing","checksum"]
 license = "MIT OR Apache-2.0"

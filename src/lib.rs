@@ -49,6 +49,7 @@
 
 #![forbid(unsafe_code)]
 
+
 use blake2_rfc::blake2b::Blake2b;
 use crypto_hash::{Algorithm, Hasher};
 use std::io::Write;
@@ -88,6 +89,10 @@ pub enum OsAlgorithm {
     SHA1,
     SHA256,
     SHA512,
+}
+#[derive(Debug,Clone,PartialEq,PartialOrd)]
+pub enum FileError {
+    FileNotFound,
 }
 
 impl Default for OsAlgorithm {
@@ -137,7 +142,7 @@ impl ParanoidHash {
     pub fn read<T: AsRef<Path>>(&self, path: T) -> (String,String) {
 
         // Opens File Using File Buffer
-        let fbuffer = FileBuffer::open(path).expect("failed to open file");
+        let fbuffer = FileBuffer::open(path).expect("Failed To Read File");
         
         // Sets Blake2b Context at the given digest size
         let mut context = Blake2b::new(self.digest_size);
@@ -188,7 +193,13 @@ impl ParanoidHash {
     /// # Read useing std::fs
     /// 
     /// This function allows you to read files using `std::fs`. This is rust's default way of reading files.
-    pub fn read_using_fs<T: AsRef<Path>>(&self, path: T) -> (String,String) {
+    pub fn read_using_fs<T: AsRef<Path>>(&self, path: T) -> Result<(String,String),FileError> {
+
+        // For Errors
+        let does_file_exist = path.as_ref().exists();
+        if does_file_exist == false {
+            return Err(FileError::FileNotFound)
+        }
 
         // Opens File Using Standard Library (fs) and read file to string
         let fbuffer = fs::read(path).expect("failed to open file");
@@ -212,7 +223,7 @@ impl ParanoidHash {
         let os_hash = os_hasher.finish();
         
         // Return as Upper Hexadecimal Encoded String
-        return (hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash))
+        return Ok((hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash)))
     }
     /// # Read String
     /// This function will allow you to take a `String` or `str`, convert it to bytes, then hash it.

@@ -84,6 +84,8 @@ pub struct ParanoidHash {
 /// * SHA1
 /// * SHA256
 /// * SHA512
+/// 
+/// **Default** uses **SHA512**
 #[derive(Debug,Clone,PartialEq,PartialOrd)]
 pub enum OsAlgorithm {
     SHA1,
@@ -93,6 +95,7 @@ pub enum OsAlgorithm {
 #[derive(Debug,Clone,PartialEq,PartialOrd)]
 pub enum FileError {
     FileNotFound,
+    OsHashingError,
 }
 
 impl Default for OsAlgorithm {
@@ -139,7 +142,13 @@ impl ParanoidHash {
             panic!("[Error] Digest Size is either too large or too small. It should be 1-64.")
         }
     }
-    pub fn read<T: AsRef<Path>>(&self, path: T) -> (String,String) {
+    pub fn read<T: AsRef<Path>>(&self, path: T) -> Result<(String,String),FileError> {
+        
+        // Checks whether file exists. If file does not exist, returns error as FileError.
+        let does_file_exist = path.as_ref().exists();
+        if does_file_exist == false {
+            return Err(FileError::FileNotFound)
+        }
 
         // Opens File Using File Buffer
         let fbuffer = FileBuffer::open(path).expect("Failed To Read File");
@@ -150,7 +159,7 @@ impl ParanoidHash {
         let hash = context.finalize();
 
         // Operating System Hashing
-        let mut os_hasher = match self.os_hash_function {
+        let mut os_hasher: Hasher = match self.os_hash_function {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
@@ -161,12 +170,18 @@ impl ParanoidHash {
         let os_hash = os_hasher.finish();
         
         // Return as Upper Hexadecimal Encoded String
-        return (hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash))
+        return Ok((hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash)))
     }
     /// # Read With Key
     /// 
     /// This method reads the file and uses a key with the Blake2b hash function. It does not and cannot use the key with the operating system hash function.
-    pub fn read_with_key<T: AsRef<Path>>(&self, path: T, key: &[u8]) -> (String,String) {
+    pub fn read_with_key<T: AsRef<Path>>(&self, path: T, key: &[u8]) -> Result<(String,String),FileError> {
+        
+        // Checks if file exists. If file does not exist, returns error.
+        let does_file_exist = path.as_ref().exists();
+        if does_file_exist == false {
+            return Err(FileError::FileNotFound)
+        }
 
         // Opens File Using File Buffer
         let fbuffer = FileBuffer::open(path).expect("failed to open file");
@@ -177,7 +192,7 @@ impl ParanoidHash {
         let hash = context.finalize();
         
         // Operating System Hashing
-        let mut os_hasher = match self.os_hash_function {
+        let mut os_hasher: Hasher = match self.os_hash_function {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
@@ -188,14 +203,14 @@ impl ParanoidHash {
         let os_hash = os_hasher.finish();
         
         // Return as Upper Hexadecimal Encoded String
-        return (hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash))
+        return Ok((hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash)))
     }
     /// # Read useing std::fs
     /// 
     /// This function allows you to read files using `std::fs`. This is rust's default way of reading files.
-    pub fn read_using_fs<T: AsRef<Path>>(&self, path: T) -> Result<(String,String),FileError> {
+    pub fn read_using_std<T: AsRef<Path>>(&self, path: T) -> Result<(String,String),FileError> {
 
-        // For Errors
+        // Checks whether file exists and if it doesn't, returns error. For Error-Handling.
         let does_file_exist = path.as_ref().exists();
         if does_file_exist == false {
             return Err(FileError::FileNotFound)
@@ -288,6 +303,18 @@ impl ParanoidHash {
     /// This method will return the hash function used by the operating system that was chosen
     pub fn return_os_hash(&self) -> OsAlgorithm {
         return self.os_hash_function.clone()
+    }
+    /// ## Compare Hash
+    /// 
+    /// **Notice:** This function attempts to use constant-time operations in comparing strings based on [this](https://stackoverflow.com/questions/44691363/how-to-compare-strings-in-constant-time).
+    /// 
+    /// **Description:** Compares two hash functions (case-sensitive) and if they are the same, returns true. If they are different, returns false.
+    pub fn compare_hash<T: AsRef<str>>(hash1: T,hash2: T) -> bool {
+        if hash1.as_ref().len() != hash2.as_ref().len() {
+            return false;
+        }
+        hash1.as_ref().bytes().zip(hash2.as_ref().bytes())
+            .fold(0, |acc, (a, b)| acc | (a ^ b) ) == 0
     }
     
 }

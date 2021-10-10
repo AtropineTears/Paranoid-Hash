@@ -70,7 +70,7 @@ use std::fs;
 /// # SecureHash Hashing Constructor
 /// 
 /// This struct is used to get the configuration for hashing
-#[derive(Debug,Clone,PartialEq,PartialOrd)]
+#[derive(Debug,Clone,PartialEq,PartialOrd,Hash)]
 pub struct ParanoidHash {
     digest_size: usize,
     os_hash_function: OsAlgorithm,
@@ -86,13 +86,13 @@ pub struct ParanoidHash {
 /// * SHA512
 /// 
 /// **Default** uses **SHA512**
-#[derive(Debug,Clone,PartialEq,PartialOrd)]
+#[derive(Debug,Clone,PartialEq,PartialOrd,Hash)]
 pub enum OsAlgorithm {
     SHA1,
     SHA256,
     SHA512,
 }
-#[derive(Debug,Clone,PartialEq,PartialOrd)]
+#[derive(Debug,Clone,PartialEq,PartialOrd,Hash)]
 pub enum FileError {
     FileNotFound,
     OsHashingError,
@@ -288,10 +288,10 @@ impl ParanoidHash {
         // Return as Upper Hexadecimal Encoded String
         return (hex::encode_upper(hash.as_bytes()),hex::encode_upper(os_hash))
     }
-    /// ## as_bytes()
-    /// `as_bytes()` converts from a **Hexadecimal String** to a **Vector of Bytes**
-    pub fn as_bytes(s: &str) -> Vec<u8> {
-        return hex::decode(s).unwrap()
+    /// ## decode_from_hex()
+    /// `decode_from_hex()` (which was `as_bytes()`) converts from a **Hexadecimal String** to a **Vector of Bytes**
+    pub fn decode_from_hex<T: AsRef<str>>(s: T) -> Vec<u8> {
+        return hex::decode(s.as_ref()).unwrap()
     }
     /// ## Return Digest Size
     /// This method will return the provided digest size that the struct contains. It should be between 1 and 64 of type `usize`.
@@ -301,19 +301,22 @@ impl ParanoidHash {
     /// ## Return Operating System Hash Function
     /// 
     /// This method will return the hash function used by the operating system that was chosen
-    pub fn return_os_hash(&self) -> OsAlgorithm {
+    pub fn return_os_hash_algorithm(&self) -> OsAlgorithm {
         return self.os_hash_function.clone()
     }
     /// ## Compare Hash
     /// 
     /// **Notice:** This function attempts to use constant-time operations in comparing strings based on [this](https://stackoverflow.com/questions/44691363/how-to-compare-strings-in-constant-time).
     /// 
-    /// **Description:** Compares two hash functions (case-sensitive) and if they are the same, returns true. If they are different, returns false.
+    /// **Description:** Compares two hash functions (case-insensitive) and if they are the same, returns true. If they are different, returns false.
     pub fn compare_hash<T: AsRef<str>>(hash1: T,hash2: T) -> bool {
-        if hash1.as_ref().len() != hash2.as_ref().len() {
+        let hash1_lowercase = hash1.as_ref().to_lowercase();
+        let hash2_lowercase: String = hash2.as_ref().to_lowercase();
+        
+        if hash1_lowercase.len() != hash2_lowercase.len() {
             return false;
         }
-        hash1.as_ref().bytes().zip(hash2.as_ref().bytes())
+        hash1_lowercase.bytes().zip(hash2_lowercase.bytes())
             .fold(0, |acc, (a, b)| acc | (a ^ b) ) == 0
     }
     

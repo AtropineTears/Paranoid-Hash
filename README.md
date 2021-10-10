@@ -1,6 +1,6 @@
 # Paranoid-Hash
 
-[![Crates.io](https://img.shields.io/crates/v/paranoid-hash?style=flat-square)](https://crates.io/crates/paranoid-hash)![Crates.io](https://img.shields.io/crates/l/paranoid-hash?style=flat-square)
+[![Crates.io](https://img.shields.io/crates/v/paranoid-hash?style=flat-square)](https://crates.io/crates/paranoid-hash) ![Crates.io](https://img.shields.io/crates/l/paranoid-hash?style=flat-square)
 
 **Paranoid-Hash** is a rust crate for hashing files, strings, or bytes using a hash function provided by a Rust Library and the hash function provided by the Operating System.
 

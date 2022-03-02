@@ -1,6 +1,6 @@
 [package]
 name = "paranoid-hash"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2018"
 description = "A Hashing Library For Those Paranoid With Their Security"
 categories = ["asynchronous","cryptography","filesystem","parsing"]

@@ -84,6 +84,7 @@ pub struct ParanoidHash {
 /// * SHA1
 /// * SHA256
 /// * SHA512
+/// * MD5
 /// 
 /// **Default** uses **SHA512**
 #[derive(Debug,Clone,PartialEq,PartialOrd,Hash)]
@@ -91,6 +92,7 @@ pub enum OsAlgorithm {
     SHA1,
     SHA256,
     SHA512,
+    MD5,
 }
 #[derive(Debug,Clone,PartialEq,PartialOrd,Hash)]
 pub enum FileError {
@@ -163,6 +165,7 @@ impl ParanoidHash {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
+            OsAlgorithm::MD5 => Hasher::new(Algorithm::MD5),
         };
 
         // Finish Operating System Hashing
@@ -196,6 +199,7 @@ impl ParanoidHash {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
+            OsAlgorithm::MD5 => Hasher::new(Algorithm::MD5),
         };
 
         // Finish Operating System Hashing
@@ -231,6 +235,7 @@ impl ParanoidHash {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
+            OsAlgorithm::MD5 => Hasher::new(Algorithm::MD5),
         };
 
         // Finish Operating System Hashing
@@ -255,6 +260,7 @@ impl ParanoidHash {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
+            OsAlgorithm::MD5 => Hasher::new(Algorithm::MD5),
         };
 
         // Finish Operating System Hashing
@@ -279,6 +285,7 @@ impl ParanoidHash {
             OsAlgorithm::SHA1 => Hasher::new(Algorithm::SHA1),
             OsAlgorithm::SHA256 => Hasher::new(Algorithm::SHA256),
             OsAlgorithm::SHA512 => Hasher::new(Algorithm::SHA512),
+            OsAlgorithm::MD5 => Hasher::new(Algorithm::MD5),
         };
 
         // Finish Operating System Hashing
